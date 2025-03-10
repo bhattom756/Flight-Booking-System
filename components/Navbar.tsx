@@ -5,23 +5,22 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
-  const [user, setUser] = useState<{ name: string } | null>(null);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Fetch logged-in user data
     const fetchUser = async () => {
       try {
         const res = await fetch("/api/user");
         if (res.ok) {
           const data = await res.json();
-          setUser(data); // Set user data if logged in
+          setUser(data);
         } else {
-          setUser(null); // Clear user data if not logged in
+          setUser(null);
         }
       } catch (error) {
         console.error("Failed to fetch user", error);
-        setUser(null); // Clear user data on error
+        setUser(null);
       }
     };
     fetchUser();
@@ -31,8 +30,8 @@ export default function Navbar() {
     try {
       const res = await fetch("/api/logout", { method: "POST" });
       if (res.ok) {
-        setUser(null); // Clear user data on logout
-        router.push("/login"); // Redirect to login page
+        setUser(null);
+        router.push("/login");
       }
     } catch (error) {
       console.error("Logout failed", error);
@@ -72,7 +71,9 @@ export default function Navbar() {
           <div className="d-flex align-items-center">
             {user ? (
               <>
-                <span className="me-3">👤 {user.name}</span>
+                <Link href="/profile" className="me-3 text-decoration-none">
+                  👤 {user.name}
+                </Link>
                 <button className="btn btn-danger" onClick={handleLogout}>
                   Logout
                 </button>

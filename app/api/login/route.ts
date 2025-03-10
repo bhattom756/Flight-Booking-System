@@ -19,9 +19,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 400 });
     }
 
-    // Set a cookie with the user's email (or ID) to manage the session
+    
     (await
-      // Set a cookie with the user's email (or ID) to manage the session
       cookies()).set("user_session", user.email, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

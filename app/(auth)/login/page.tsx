@@ -19,7 +19,7 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-        credentials: "include", // Include cookies in the request
+        credentials: "include", 
       });
   
       const data = await res.json();
@@ -27,7 +27,7 @@ export default function LoginPage() {
   
       if (res.status === 200) {
         alert("Login successful!");
-        router.push("/"); // Redirect to Home page
+        router.push("/");
       } else {
         alert(data.error || "Login failed");
       }

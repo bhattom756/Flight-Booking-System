@@ -15,17 +15,36 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         await connectDB();
         const user = await User.findOne({ email: credentials?.email });
-
         if (!user || !(await bcrypt.compare(credentials?.password!, user.password))) {
           throw new Error("Invalid credentials");
         }
-
         return { id: user._id.toString(), name: user.name, email: user.email };
       }
     })
   ],
   session: {
     strategy: "jwt",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user = { 
+          id: token.id as string, 
+          name: token.name,
+          email: token.email,
+          image: session.user.image
+        };
+      }
+      return session;
+    }
   },
   secret: process.env.NEXTAUTH_SECRET
 };
