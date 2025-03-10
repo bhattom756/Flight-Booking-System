@@ -5,42 +5,23 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Navbar() {
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch("/api/user");
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user", error);
-        setUser(null);
-      }
+    // Check if user is logged in by looking for the cookie
+    const checkAuth = () => {
+      const cookies = document.cookie.split(';');
+      const userSession = cookies.find(cookie => cookie.trim().startsWith('user_session='));
+      setIsLoggedIn(!!userSession);
     };
-    fetchUser();
-  }, []);
 
-  const handleLogout = async () => {
-    try {
-      const res = await fetch("/api/logout", { method: "POST" });
-      if (res.ok) {
-        setUser(null);
-        router.push("/login");
-      }
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
-  };
+    checkAuth();
+  }, []);
 
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary">
-      <div className="container-fluid">
+      <div className="container">
         <Link className="navbar-brand" href="/">
           SkyHook
         </Link>
@@ -48,42 +29,50 @@ export default function Navbar() {
           className="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
           aria-expanded="false"
           aria-label="Toggle navigation"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-        <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav me-auto">
             <li className="nav-item">
-              <Link className="nav-link active" href="/">
+              <Link className="nav-link" href="/">
                 Home
               </Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link" href="/bookings">
-                My Bookings
-              </Link>
-            </li>
-          </ul>
-          <div className="d-flex align-items-center">
-            {user ? (
-              <>
-                <Link href="/profile" className="me-3 text-decoration-none">
-                  👤 {user.name}
+            {isLoggedIn && (
+              <li className="nav-item">
+                <Link className="nav-link" href="/bookings">
+                  My Bookings
                 </Link>
-                <button className="btn btn-danger" onClick={handleLogout}>
-                  Logout
-                </button>
+              </li>
+            )}
+          </ul>
+          <ul className="navbar-nav">
+            {!isLoggedIn ? (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link" href="/login">
+                    Login
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" href="/signup">
+                    Sign Up
+                  </Link>
+                </li>
               </>
             ) : (
-              <Link href="/login" className="btn btn-primary">
-                Login
-              </Link>
+              <li className="nav-item">
+                <Link className="nav-link" href="/profile">
+                  Profile
+                </Link>
+              </li>
             )}
-          </div>
+          </ul>
         </div>
       </div>
     </nav>

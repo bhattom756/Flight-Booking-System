@@ -5,3 +5,20 @@
   list-style-type: none;
 }
 
+.search-form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px; /* Space between fields */
+}
+
+.search-field {
+  flex: 1; /* Allow fields to grow */
+  min-width: 200px; /* Minimum width for fields */
+}
+
+.search-button {
+  flex: none; /* Prevent button from growing */
+  align-self: center; /* Center the button vertically */
+}
+
