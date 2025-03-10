@@ -12,11 +12,13 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch("/api/user");
+        // Include credentials so the session cookie is sent
+        const res = await fetch("/api/user", { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
           setUser(data);
         } else {
+          // If unauthorized, redirect to login
           router.push("/login");
         }
       } catch (error) {
@@ -35,16 +37,17 @@ export default function ProfilePage() {
     }
 
     try {
+      // Include credentials here too
       const res = await fetch("/api/changepass", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ password: newPassword }),
       });
-
+      const data = await res.json();
       if (res.ok) {
         setMessage("Password changed successfully!");
       } else {
-        const data = await res.json();
         setMessage(data.error || "Failed to change password.");
       }
     } catch (error) {
