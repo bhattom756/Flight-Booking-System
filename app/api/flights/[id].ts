@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+ Xn`    import { NextApiRequest, NextApiResponse } from 'next';
 import { connectDB } from '@/lib/mongodb';
 import Flight from '@/models/Flight'; // Adjust the import based on your project structure
 

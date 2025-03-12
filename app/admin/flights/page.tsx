@@ -1,30 +1,43 @@
+import { NextApiRequest, NextApiResponse } from 'next';
 import { connectDB } from '@/lib/mongodb';
 import Flight from '@/models/Flight';
-import Link from 'next/link';
-import AdminFlightsTable from '@/components/AdminFlightsTable';
 
-async function getFlights() {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { method } = req;
+  const { id } = req.query;
+
   await connectDB();
-  const flights = await Flight.find().sort({ createdAt: -1 });
-  return JSON.parse(JSON.stringify(flights));
-}
 
-export default async function AdminFlightsPage() {
-  const flights = await getFlights();
+  console.log('Editing flight with ID:', id);
+  console.log('Request body:', req.body);
+  console.log('Received ID:', id); // Log the ID received
 
-  return (
-    <div className="container py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Flight Management</h1>
-        <Link 
-          href="/admin/add-flight" 
-          className="btn btn-primary"
-        >
-          Add New Flight
-        </Link>
-      </div>
+  if (method === 'PUT') {
+    try {
+      const updatedFlight = await Flight.findByIdAndUpdate(id, req.body, { new: true });
+      if (!updatedFlight) return res.status(404).json({ message: 'Flight not found' });
+      return res.status(200).json(updatedFlight);
+    } catch (error) {
+      console.error('Error updating flight:', error);
+      return res.status(500).json({ message: 'Failed to update flight', error });
+    }
+  }  else if (method === 'DELETE') {
+    try {
+      if (!id) {
+        console.error('No ID provided for deletion');
+        return res.status(400).json({ message: 'Flight ID is required' });
+      }
 
-      <AdminFlightsTable flights={flights} />
-    </div>
-  );
-} 
+      const deletedFlight = await Flight.findByIdAndDelete(id);
+      if (!deletedFlight) {
+        console.error(`Flight not found for ID: ${id}`);
+        return res.status(404).json({ message: 'Flight not found' });
+      }
+
+      console.log(`Flight with ID ${id} deleted successfully`);
+      return res.status(204).end(); // No content
+    } catch (error) {
+      console.error('Error deleting flight:', error);
+      return res.status(500).json({ message: 'Failed to delete flight', error });
+    }
+  }

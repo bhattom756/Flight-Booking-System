@@ -34,7 +34,11 @@ async function searchFlights(params: SearchPageProps['searchParams']) {
   return Flight.find(query).sort('departureTime');
 }
 
-export default async function SearchPage({ searchParams }: SearchPageProps) {
+export default async function SearchPage({ searchParams }: { searchParams?: Record<string, string> }) {
+  if (!searchParams) {
+    return <div>No search parameters provided</div>;
+  }
+
   const flights = await searchFlights(searchParams);
 
   return (
@@ -62,4 +66,4 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       </div>
     </div>
   );
-} 
+}

@@ -71,4 +71,41 @@ export async function GET(req: NextApiRequest, res: NextApiResponse) {
 
   res.setHeader('Allow', ['GET']);
   return res.status(405).end(`Method ${method} Not Allowed`);
-} 
+}
+
+export async function DELETE(req: Request) {
+  try {
+    await connectDB();
+    const userSession = (await cookies()).get("user_session")?.value;
+    
+    if (!userSession) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const user = await User.findOne({ email: userSession });
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const { bookingId } = await req.json();
+    const booking = await Booking.findById(bookingId);
+
+    if (!booking) {
+      return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+    }
+
+    if (booking.userId.toString() !== user.id.toString()) {
+      return NextResponse.json({ error: 'Unauthorized to delete this booking' }, { status: 403 });
+    }
+
+    await Flight.findByIdAndUpdate(booking.flightId, {
+      $inc: { availableSeats: booking.passengers.length }
+    });
+
+    await Booking.findByIdAndDelete(bookingId);
+
+    return NextResponse.redirect('/');
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

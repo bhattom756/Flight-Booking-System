@@ -40,6 +40,7 @@ export default function AddFlightPage() {
     }
   };
 
+  
   return (
     <div className="container py-8">
       <h1 className="text-2xl font-bold mb-6">Add New Flight</h1>
